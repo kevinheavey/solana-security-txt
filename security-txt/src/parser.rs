@@ -1,7 +1,6 @@
 use crate::{SECURITY_TXT_BEGIN, SECURITY_TXT_END};
 use core::fmt::{self, Display};
 use std::collections::HashMap;
-use thiserror::Error;
 use twoway::find_bytes;
 
 pub enum Contact {
@@ -117,29 +116,45 @@ impl Contact {
     }
 }
 
-#[derive(Error, Debug)]
+#[derive(Debug)]
 pub enum SecurityTxtError {
-    #[error("security.txt doesn't start with the right string")]
     InvalidSecurityTxtBegin,
-    #[error("Couldn't find end string")]
     EndNotFound,
-    #[error("Couldn't find start string")]
     StartNotFound,
-    #[error("Invalid field: `{0:?}`")]
     InvalidField(Vec<u8>),
-    #[error("Unknown field: `{0}`")]
     UnknownField(String),
-    #[error("Invalid value `{0:?}` for field `{1}`")]
     InvalidValue(Vec<u8>, String),
-    #[error("Invalid contact `{0}`")]
     InvalidContact(String),
-    #[error("Missing field: `{0}`")]
     MissingField(String),
-    #[error("Duplicate field: `{0}`")]
     DuplicateField(String),
-    #[error("Uneven amount of parts")]
     Uneven,
 }
+
+impl std::error::Error for SecurityTxtError {}
+
+impl fmt::Display for SecurityTxtError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SecurityTxtError::InvalidSecurityTxtBegin => {
+                write!(f, "security.txt doesn't start with the right string")
+            }
+            SecurityTxtError::EndNotFound => write!(f, "Couldn't find end string"),
+            SecurityTxtError::StartNotFound => write!(f, "Couldn't find start string"),
+            SecurityTxtError::InvalidField(v) => {
+                write!(f, "Invalid field: `{v:?}`")
+            }
+            SecurityTxtError::UnknownField(s) => write!(f, "Unknown field: `{s}`",),
+            SecurityTxtError::InvalidValue(v, s) => {
+                write!(f, "Invalid value `{v:?}` for field `{s}`",)
+            }
+            SecurityTxtError::InvalidContact(s) => write!(f, "Invalid contact `{s}`",),
+            SecurityTxtError::MissingField(s) => write!(f, "Missing field: `{s}`",),
+            SecurityTxtError::DuplicateField(s) => write!(f, "Duplicate field: `{s}`",),
+            SecurityTxtError::Uneven => write!(f, "Uneven amount of parts"),
+        }
+    }
+}
+
 /// Parses a security.txt. Might not consume all of `data`.
 pub fn parse(mut data: &[u8]) -> Result<SecurityTxt, SecurityTxtError> {
     if !data.starts_with(SECURITY_TXT_BEGIN.as_bytes()) {

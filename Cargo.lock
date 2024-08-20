@@ -3035,7 +3035,6 @@ dependencies = [
 name = "solana-security-txt"
 version = "1.1.1"
 dependencies = [
- "thiserror",
  "twoway",
 ]
 

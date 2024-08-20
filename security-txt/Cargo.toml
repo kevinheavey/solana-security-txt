@@ -9,8 +9,7 @@ license = "MIT OR Apache-2.0"
 
 [features]
 # when no features are enabled, this crate has no dependencies. The parser requires two, but won't be used on-chain.
-parser = ["thiserror", "twoway"]
+parser = ["twoway"]
 
 [dependencies]
-thiserror = { version = "=1.0.30", optional = true }
 twoway = { version = "=0.2.2", optional = true }
